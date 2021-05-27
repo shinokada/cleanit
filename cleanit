@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+########################
+# Author: Shinichi Okada
+# Date: 2021-05-26
+###########################
+
+script_name=$(basename "$0")
+version="0.0.3"
+
+usage() {
+    cat <<EOF
+Name: $script_name
+Description: This script moves files older than 20 days from a directory (default ~/Downloads) to another directory (default ~/.Trash).
+
+Usage:  $script_name [ -f ] [ -d ] [ -t ][ -h ][ -v ]
+    -f target-directory (~/Download as default) 
+    -d (Default is 20) Set days to indicate the maximum days to keep files. 
+    -t (default is ~/.Trash) Set the directory where you want files to move to. 
+    -h Show help
+    -v Show version
+
+Examples:  
+    Move files older than 20 days in ~/Downloads to ~/.Trash
+    $ $script_name
+
+    Move files older than 10 days in ~/Mydir to ~/.Trash
+    $ $script_name -d 10 -f ~/Mydir
+
+    Move files older than 5 days in ~/Mydir to ~/Anotherdir
+    $ $script_name -f ~/Mydir -d 5 -t ~/Anotherdir
+EOF
+    exit 2
+}
+
+move_to_trash() {
+    find "$FROM_DIR" -mtime +"$DAYS" -exec mv {} "$TO_DIR" \; 2>/dev/null
+    return 0
+}
+
+remove_from_trash() {
+    local trash=$HOME/.Trash
+    # remove files
+    find "$trash" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    # remove direcotries
+    find "$trash"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    return 0
+}
+
+####################################
+# Main script
+
+unset FROM_DIR TO_DIR DAYS
+
+FROM_DIR=$HOME/Downloads
+TO_DIR=$HOME/.Trash
+DAYS=20
+
+while getopts "f:d:t:?h" opt; do
+    case $opt in
+    f) FROM_DIR=$OPTARG ;;
+    d) DAYS=$OPTARG ;;
+    t) TO_DIR=$OPTARG ;;
+    v)
+        echo $version
+        exit
+        ;;
+    h | *)
+        usage
+        exit
+        ;;
+    esac
+done
+
+[ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && usage
+
+if [[ -d $FROM_DIR ]]; then
+    NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
+elif [[ "$FROM_DIR" =~ "trash" ]]; then
+    NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
+else
+    echo "No such directory: $FROM_DIR"
+    exit 2
+fi
+
+if [[ $DAYS -lt 0 ]]; then
+    echo "Days must be greater then 0."
+    exit 1
+fi
+
+if [[ $NUM -gt 0 ]]; then
+    # matches patterns in a case-insensitive
+    shopt -s nocasematch
+    if [[ "$FROM_DIR" =~ "trash" ]]; then
+        # remove files from Trash permanently
+        remove_from_trash || {
+            echo "Can't remove from the directory, exiting script!"
+            exit 1
+        }
+        echo "Removed $NUM files older than $DAYS days from ~/.Trash."
+    else
+        # move files to Trash
+        move_to_trash || {
+            echo "Can't move to trash, exiting script!"
+            exit 1
+        }
+        echo "Moved $NUM files older than $DAYS days in the  $FROM_DIR to $TO_DIR."
+    fi
+else
+    echo "No files older than $DAYS days in $FROM_DIR."
+fi
+
+exit 0
