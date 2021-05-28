@@ -6,12 +6,16 @@ Cleanit moves files older than 20 days (default) from a directory (default ~/Dow
 
 ```sh
 Usage:  cleanit [ -f ] [ -d ] [ -t ][ -h ]
-    -f target-directory (~/Download as default) 
+    -f target-directory (~/Downloads as default) 
     -d (Default is 20) Set days to indicate the maximum days to keep files. 
     -t (default is ~/.Trash) Set the directory where you want files to move to. 
     -h Show help
     -v Show version
 ```
+
+## Prerequisite
+
+- In the security settings Terminal app Full Disk permissions. ![security](./images/access.png)
 
 ## Examples
 
@@ -33,6 +37,13 @@ Move files older than 5 days in ~/Mydir to ~/Anotherdir
 cleanit -f ~/Mydir -d 5 -t ~/Anotherdir
 ```
 
+You can clean up the Trash directory.
+
+```sh
+cleanit -d 30 -f trash
+```
+
+This will remove files older than 30 days from `~.Trash` directory
 
 ## Author
 

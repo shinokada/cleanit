@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# path to notifier
+notifier=$(which terminal-notifier)
+# path to cleanit
+cleanit=$(which cleanit)
+
+# clean Download
+# store the output to a variable
+download_notice=$($cleanit)
+# clean Trash
+trash_notice=$($cleanit -f trash -d changedays)
+
+$notifier -message "Downloads: $download_notice"
+$notifier -message "Trash: $trash_notice"

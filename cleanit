@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.0.3"
+version="0.0.4"
 
 usage() {
     cat <<EOF
@@ -17,20 +17,37 @@ Usage:  $script_name [ -f ] [ -d ] [ -t ][ -h ][ -v ]
     -f target-directory (~/Download as default) 
     -d (Default is 20) Set days to indicate the maximum days to keep files. 
     -t (default is ~/.Trash) Set the directory where you want files to move to. 
+    -c Set a cron job
+
     -h Show help
     -v Show version
 
 Examples:  
     Move files older than 20 days in ~/Downloads to ~/.Trash
-    $ $script_name
+    $script_name
+
+    $script_name -f ~/Mydir
 
     Move files older than 10 days in ~/Mydir to ~/.Trash
-    $ $script_name -d 10 -f ~/Mydir
+    $script_name -d 10 -f ~/Mydir
 
     Move files older than 5 days in ~/Mydir to ~/Anotherdir
-    $ $script_name -f ~/Mydir -d 5 -t ~/Anotherdir
+    $script_name -f ~/Mydir -d 5 -t ~/Anotherdir
+
+    Clean up Trash
+    $script_name -f trash
+
+    Set a cron job to remove files that are older than 30 days at 13:30 everyday.
+    $script_name -c -d 30 -h 13 -m 30
+
 EOF
-    exit 2
+}
+
+fn_check_trash_access() {
+    if [[ ! -r $HOME/.Trash ]]; then
+        echo "Give the Terminal.app Full Disk permission in the security settings. See the README."
+        exit 1
+    fi
 }
 
 move_to_trash() {
@@ -47,6 +64,45 @@ remove_from_trash() {
     return 0
 }
 
+fn_num() {
+    local from_dir=${1}
+    local days=${2}
+    # echo $from_dir
+    # echo $days
+    echo $(find "${from_dir}" -mtime +"${days}" | wc -l | xargs)
+}
+
+fn_cron() {
+    local plist_name="com.shinokada.cleanit.plist"
+    local plist_path="$HOME/Library/LaunchAgents"
+    local launchd_file="$HOME/.cleanit/cleanit-launchd"
+    # local days=30
+    local username=$(whoami)
+    local days=${1}
+    local $minute=${2}
+    local $hour=${3}
+    # echo $days
+    # create a directory LaunchAgents and plist and save it to "${plist_path}/${plist_name}"
+    if [[ -d "${plist_path}" ]]; then
+        touch "${plist_path}/${plist_name}"
+    else
+        mkdir "${plist_path}" && touch "${plist_path}/${plist_name}"
+    fi
+    # replace username, workingdirectory, hour, minute
+    SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+    sed "s/changeusername/${username}/;s/changeworkingdirectory/${workingdirectory}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${SCRIPT_DIR}/${plist_name}" >"${plist_path}/${plist_name}"
+
+    # launchd
+    # mkdir -p ~/.cleanit
+    # check ~/.cleanit dir
+    if [ ! -d "$HOME/.cleanit"]; then mkdir "$HOME/.cleanit"; fi
+    # touch /$HOME/.cleanit/cleanit-launchd
+    touch "${launchd_file}"
+    # replace $days in cleanit-launchd and write to the file
+    sed "s/changedays/${days}" >"${launchd_file}"
+    exit
+}
+
 ####################################
 # Main script
 
@@ -55,17 +111,47 @@ unset FROM_DIR TO_DIR DAYS
 FROM_DIR=$HOME/Downloads
 TO_DIR=$HOME/.Trash
 DAYS=20
+CRON=false
 
-while getopts "f:d:t:?h" opt; do
-    case $opt in
-    f) FROM_DIR=$OPTARG ;;
-    d) DAYS=$OPTARG ;;
-    t) TO_DIR=$OPTARG ;;
-    v)
+# No parameter
+if [[ $# = 0 ]]; then
+    NUM=$(fn_num $FROM_DIR $DAYS)
+    move_to_trash
+    echo "Moved $NUM files older than $DAYS days in the $FROM_DIR to $TO_DIR."
+    exit 0
+fi
+
+while (($# > 0)); do
+    case $1 in
+    -f | --from)
+        FROM_DIR="${2}"
+        shift 2
+        ;;
+    -d | --days)
+        DAYS="${2}"
+        shift 2
+        ;;
+    -t | -to_dir)
+        TO_DIR="${2}"
+        shift 2
+        ;;
+    -c | --cron)
+        CRON=true
+        shift 1
+        ;;
+    -o | --hour)
+        HOUR=${2}
+        shift 2
+        ;;
+    -m | --minute)
+        MINUTE=${2}
+        shift 2
+        ;;
+    -v | --version)
         echo $version
         exit
         ;;
-    h | *)
+    -h | --help)
         usage
         exit
         ;;
@@ -74,10 +160,14 @@ done
 
 [ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && usage
 
-if [[ -d $FROM_DIR ]]; then
-    NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
-elif [[ "$FROM_DIR" =~ "trash" ]]; then
-    NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
+if [[ "$FROM_DIR" =~ "trash" ]]; then
+    fn_check_trash_access
+
+    NUM=$(fn_num $HOME/.Trash $DAYS)
+    # NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
+elif [[ -d $FROM_DIR ]]; then
+    NUM=$(fn_num $FROM_DIR $DAYS)
+    # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
 else
     echo "No such directory: $FROM_DIR"
     exit 2
@@ -104,10 +194,21 @@ if [[ $NUM -gt 0 ]]; then
             echo "Can't move to trash, exiting script!"
             exit 1
         }
-        echo "Moved $NUM files older than $DAYS days in the  $FROM_DIR to $TO_DIR."
+        echo $?
+        echo "Moved $NUM files older than $DAYS days in the $FROM_DIR to $TO_DIR."
+        exit 0
     fi
 else
     echo "No files older than $DAYS days in $FROM_DIR."
+    exit 0
+fi
+
+if [[ ${CRON}="true" && (! -z "$MINUTE") && (! -z "$HOUR") ]]; then
+    cron $DAYS $MINUTE $HOUR
+else
+    echo "Please provide -h hour and -m minute."
+    usage
+    exit 1
 fi
 
 exit 0

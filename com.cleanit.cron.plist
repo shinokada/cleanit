@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.cleanit.cron</string>
+        <key>Program</key>
+        <string>/Users/changeusername/.cleanit/cleanit-launchd</string>
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>PATH</key>
+            <string>/bin:/usr/bin:/usr/local/bin</string>
+        </dict>
+        <key>StandardInPath</key>
+        <string>/tmp/cleanit.stdin</string>
+        <key>StandardOutPath</key>
+        <string>/tmp/cleanit.stdout</string>
+        <key>StandardErrorPath</key>
+        <string>/tmp/cleanit.stderr</string>
+        <key>WorkingDirectory</key>
+        <string>changeworkingdirectory</string>
+        <key>StartCalendarInterval</key>
+        <dict>
+            <key>Hour</key>
+            <integer>changehour</integer>
+            <key>Minute</key>
+            <integer>changeminute</integer>
+        </dict>
+    </dict>
+</plist>
