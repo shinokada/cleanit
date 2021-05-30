@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>Label</key>
-        <string>com.shinokada.cleanit</string>
+        <string>local.cleanit</string>
         <key>Program</key>
         <string>/Users/changeusername/.cleanit/cleanit-launchd</string>
         <key>EnvironmentVariables</key>
@@ -17,8 +17,6 @@
         <string>/tmp/cleanit.stdout</string>
         <key>StandardErrorPath</key>
         <string>/tmp/cleanit.stderr</string>
-        <key>WorkingDirectory</key>
-        <string>/Users/changeusername</string>
         <key>StartCalendarInterval</key>
         <dict>
             <key>Hour</key>

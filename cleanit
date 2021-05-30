@@ -74,7 +74,7 @@ fn_num() {
 }
 
 fn_cron() {
-    local plist_name="com.shinokada.cleanit.plist"
+    local plist_name="local.cleanit.plist"
     local plist_path="$HOME/Library/LaunchAgents"
     local launchd_name="cleanit-launchd"
     local launchd_path="$HOME/.cleanit/"
@@ -93,7 +93,7 @@ fn_cron() {
     # echo $plist_path
     if [[ -d "${plist_path}" ]]; then
         # echo "cron 1a"
-        echo "Creating dir and file ${plist_path}/${plist_name}"
+        echo "Creating a dir and a file, ${plist_path}/${plist_name}"
         touch "${plist_path}/${plist_name}"
         echo "A plist created."
     else
@@ -110,16 +110,12 @@ fn_cron() {
         echo "It's a symlink"
         ACTUAL=$(readlink $(which $script_name))
         ACTUAL_DIR=${ACTUAL%/*}
-        echo "actual dir: ${ACTUAL_DIR}"
     else
         ACTUAL_DIR="${SCRIPT_DIR}"
     fi
-    echo "plist file: ${ACTUAL_DIR}/${plist_name}"
     # echo "PWD is $(pwd)"
     # echo "basename is $(basename $0)"
-    echo "script_dir is ${SCRIPT_DIR}"
     sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${ACTUAL_DIR}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
-    echo "done plist."
     # launchd
     # mkdir -p ~/.cleanit
     # check ~/.cleanit dir
@@ -129,14 +125,11 @@ fn_cron() {
     # touch /$HOME/.cleanit/cleanit-launchd
     touch "${launchd_file}"
     # replace $days in cleanit-launchd and write to the file
-    echo "days: ${days}"
     # since path has /, use # in sed changenotifierpath
-    sed "s/changedays/${days}/;s/changeusername/${username}/;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${ACTUAL_DIR}/${launchd_name}" >"${launchd_file}" || exit 1
-    echo "Cron files are set."
+    sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${ACTUAL_DIR}/${launchd_name}" >"${launchd_file}" || exit 1
+    echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     # make the executable
     chmod +x "${launchd_file}"
-    echo "${launchd_file}"
-    echo "${plist_path}/${plist_name}"
     # unload the job
     launchctl unload "${plist_path}/${plist_name}" || exit
     # load the job

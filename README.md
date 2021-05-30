@@ -15,7 +15,7 @@ Usage:  cleanit [ -f ] [ -d ] [ -t ][ -h ]
 
 ## Prerequisite
 
-- In the security settings Terminal app Full Disk permissions. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/full-disk-access.png)
+- In the security settings, allow Terminal app Full Disk permissions. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
 
 
 ## Examples
