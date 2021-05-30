@@ -7,6 +7,7 @@
 
 script_name=$(basename "$0")
 version="0.1.0"
+script_dir=""
 
 usage() {
     cat <<EOF
@@ -73,6 +74,27 @@ fn_num() {
     echo $(find "${from_dir}" -mtime +"${days}" | wc -l | xargs)
 }
 
+fn_script_dir() {
+    which_install=$(which "${script_name}")
+
+    if [[ -L $which_install ]]; then
+        # check if installation is Homebrew
+        # if so use script_dir=/opt/homebrew/Cellar/backpack_install/${version}/bin
+        if [[ "$which_install" == *"homebrew"* ]]; then
+            script_dir="/opt/homebrew/Cellar/"${script_name}"/${version}/bin"
+        else
+            link=$(readlink ${which_install})
+            script_dir=$(dirname ${link})
+        fi
+    else
+        script_dir="./"
+    fi
+    echo $script_dir
+}
+
+script_dir=$(fn_script_dir)
+# echo "echo from script_dir: ${script_dir}"
+
 fn_cron() {
     local plist_name="local.cleanit.plist"
     local plist_path="$HOME/Library/LaunchAgents"
@@ -102,20 +124,20 @@ fn_cron() {
     fi
     # replace username, workingdirectory, hour, minute
     # echo "Writing on plist."
-    SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+    # SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
     # check if it is a symlink
-    if [[ -L "$SCRIPT_DIR/$(basename $0)" ]]; then
-        # if it is, sed won't work so change it to the actual script dir using pwd
-        # cd ${SCRIPT_DIR}
-        echo "It's a symlink"
-        ACTUAL=$(readlink $(which $script_name))
-        ACTUAL_DIR=${ACTUAL%/*}
-    else
-        ACTUAL_DIR="${SCRIPT_DIR}"
-    fi
+    # if [[ -L "$script_dir/$(basename $0)" ]]; then
+    #     # if it is, sed won't work so change it to the actual script dir using pwd
+    #     # cd ${SCRIPT_DIR}
+    #     echo "It's a symlink"
+    #     ACTUAL=$(readlink $(which $script_name))
+    #     ACTUAL_DIR=${ACTUAL%/*}
+    # else
+    #     ACTUAL_DIR="${SCRIPT_DIR}"
+    # fi
     # echo "PWD is $(pwd)"
     # echo "basename is $(basename $0)"
-    sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${ACTUAL_DIR}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
+    sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
     # launchd
     # mkdir -p ~/.cleanit
     # check ~/.cleanit dir
@@ -126,7 +148,7 @@ fn_cron() {
     touch "${launchd_file}"
     # replace $days in cleanit-launchd and write to the file
     # since path has /, use # in sed changenotifierpath
-    sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${ACTUAL_DIR}/${launchd_name}" >"${launchd_file}" || exit 1
+    sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${script_dir}/${launchd_name}" >"${launchd_file}" || exit 1
     echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     # make the executable
     chmod +x "${launchd_file}"
@@ -152,7 +174,7 @@ CRON="false"
 if [[ $# = 0 ]]; then
     NUM=$(fn_num $FROM_DIR $DAYS)
     move_to_trash
-    echo "Moved $NUM files older than $DAYS days in the $FROM_DIR to $TO_DIR."
+    echo "Moved ${NUM} files older than ${DAYS} days in the $(basename ${FROM_DIR}) to $(basename ${TO_DIR})."
     exit 0
 fi
 
@@ -238,7 +260,7 @@ if [[ $NUM -gt 0 ]]; then
             echo "Can't move to trash, exiting script!"
             exit 1
         }
-        echo "Moved $NUM files older than $DAYS days in the $FROM_DIR to $TO_DIR."
+        echo "Hi, Moved $NUM files older than $DAYS days in the $(basename $FROM_DIR) to $(basename $TO_DIR)."
         exit 0
     fi
 else

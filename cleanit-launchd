@@ -10,5 +10,5 @@ download_notice=$($cleanit)
 # clean-up Trash
 trash_notice=$($cleanit -f trash -d changedays)
 
-$notifier -message "Downloads cleanup: ${download_notice}"
-$notifier -message "Trash cleanup: ${trash_notice}"
+$notifier -title Cleanit -subtitle "Daily Clean-up" -message "Downloads cleanup: ${download_notice}"
+$notifier -title Cleanit -subtitle "Daily Clean-up" -message "Trash cleanup: ${trash_notice}"
