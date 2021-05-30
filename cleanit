@@ -84,7 +84,7 @@ fn_cron() {
     local days=${1}
     local minute=${2}
     local hour=${3}
-    local cleanitpath=$(which cleanit)
+    local cleanitpath=$(which $script_name)
     local notifierpath=$(which terminal-notifier)
     # echo ${pathtocleanit}
     # exit
@@ -95,7 +95,7 @@ fn_cron() {
         # echo "cron 1a"
         echo "Creating dir and file ${plist_path}/${plist_name}"
         touch "${plist_path}/${plist_name}"
-        echo "created plist."
+        echo "A plist created."
     else
         echo "Creating ${plist_path}/${plist_name}"
         mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
@@ -106,8 +106,10 @@ fn_cron() {
     # check if it is a symlink
     if [[ -L "$SCRIPT_DIR/$(basename $0)" ]]; then
         # if it is, sed won't work so change it to the actual script dir using pwd
-        echo "Its symlink"
-        ACTUAL_DIR="$(pwd)"
+        # cd ${SCRIPT_DIR}
+        echo "It's a symlink"
+        ACTUAL=$(readlink $(which $script_name))
+        ACTUAL_DIR=${ACTUAL%/*}
         echo "actual dir: ${ACTUAL_DIR}"
     else
         ACTUAL_DIR="${SCRIPT_DIR}"
