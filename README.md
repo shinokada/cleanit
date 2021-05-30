@@ -15,8 +15,9 @@ Usage:  cleanit [ -f ] [ -d ] [ -t ][ -h ]
 
 ## Prerequisite
 
-- In the security settings, allow Terminal app Full Disk permissions. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
+For cron job, you need to allow BOTH of Terminal.app and /bin/bash Full Disk permissions in the security settings. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
 
+When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 
 ## Examples
 
