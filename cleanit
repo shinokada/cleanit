@@ -57,6 +57,7 @@ move_to_trash() {
 
 remove_from_trash() {
     local trash=$HOME/.Trash
+
     # remove files
     find "$trash" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
     # remove direcotries
@@ -77,26 +78,46 @@ fn_cron() {
     local plist_path="$HOME/Library/LaunchAgents"
     local launchd_name="cleanit-launchd"
     local launchd_path="$HOME/.cleanit/"
-    local launchd_file="${launchd_path}/${launchd_name}"
-    # local days=30
+    local launchd_file="${launchd_path}${launchd_name}"
+    # local crondays=30
     local username=$(whoami)
     local days=${1}
     local minute=${2}
     local hour=${3}
+    local cleanitpath=$(which cleanit)
+    local notifierpath=$(which terminal-notifier)
+    # echo ${pathtocleanit}
+    # exit
     # echo $days
     # create a directory LaunchAgents and plist and save it to "${plist_path}/${plist_name}"
-    # echo "cron 1"
     # echo $plist_path
     if [[ -d "${plist_path}" ]]; then
         # echo "cron 1a"
+        echo "Creating dir and file ${plist_path}/${plist_name}"
         touch "${plist_path}/${plist_name}"
+        echo "created plist."
     else
-        echo "cron 1b"
-        mkdir "${plist_path}" && touch "${plist_path}/${plist_name}"
+        echo "Creating ${plist_path}/${plist_name}"
+        mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
     fi
     # replace username, workingdirectory, hour, minute
+    # echo "Writing on plist."
     SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-    sed "s/changeusername/${username}/;s/changeworkingdirectory/${workingdirectory}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${SCRIPT_DIR}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
+    # check if it is a symlink
+    if [[ -L "$SCRIPT_DIR/$(basename $0)" ]]; then
+        # if it is, sed won't work so change it to the actual script dir using pwd
+        echo "Its symlink"
+        ACTUAL_DIR="$(pwd)"
+        echo "actual dir: ${ACTUAL_DIR}"
+    else
+        ACTUAL_DIR="${SCRIPT_DIR}"
+    fi
+    echo "plist file: ${ACTUAL_DIR}/${plist_name}"
+    # echo "PWD is $(pwd)"
+    # echo "basename is $(basename $0)"
+    echo "script_dir is ${SCRIPT_DIR}"
+    sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${ACTUAL_DIR}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
+    echo "done plist."
     # launchd
     # mkdir -p ~/.cleanit
     # check ~/.cleanit dir
@@ -106,7 +127,9 @@ fn_cron() {
     # touch /$HOME/.cleanit/cleanit-launchd
     touch "${launchd_file}"
     # replace $days in cleanit-launchd and write to the file
-    sed "s/changedays/${days}/" "${SCRIPT_DIR}/${launchd_name}" >"${launchd_file}" || exit 1
+    echo "days: ${days}"
+    # since path has /, use # in sed changenotifierpath
+    sed "s/changedays/${days}/;s/changeusername/${username}/;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${ACTUAL_DIR}/${launchd_name}" >"${launchd_file}" || exit 1
     echo "Cron files are set."
     # make the executable
     chmod +x "${launchd_file}"
@@ -128,7 +151,7 @@ unset FROM_DIR TO_DIR DAYS
 FROM_DIR=$HOME/Downloads
 TO_DIR=$HOME/.Trash
 DAYS=20
-CRON=false
+CRON="false"
 
 # No parameter
 if [[ $# = 0 ]]; then
@@ -153,7 +176,7 @@ while (($# > 0)); do
         shift 2
         ;;
     -c | --cron)
-        CRON=true
+        CRON="true"
         shift 1
         ;;
     -o | --hour)
@@ -194,12 +217,13 @@ if [[ $DAYS -lt 0 ]]; then
     exit 1
 fi
 
-if [[ ${CRON}="true" && (! -z "$MINUTE") && (! -z "$HOUR") ]]; then
-    fn_cron $DAYS $MINUTE $HOUR
-else
-    echo "Please provide -h hour and -m minute."
-    usage
-    exit 1
+if [[ ${CRON} = "true" ]]; then
+    if [[ (! -z "$MINUTE") && (! -z "$HOUR") ]]; then
+        fn_cron ${DAYS} ${MINUTE} ${HOUR}
+    else
+        echo "You must provide -o hour and -m minute."
+        exit 1
+    fi
 fi
 
 if [[ $NUM -gt 0 ]]; then
