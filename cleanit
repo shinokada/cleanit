@@ -2,11 +2,11 @@
 
 ########################
 # Author: Shinichi Okada
-# Date: 2021-05-30
+# Date: 2021-05-31
 ###########################
 
 script_name=$(basename "$0")
-version="0.1.1"
+version="0.1.2"
 script_dir=""
 
 usage() {
@@ -19,7 +19,7 @@ Usage:  $script_name [ -f ] [ -d ] [ -t ][ -h ][ -v ]
     -d (Default is 20) Set days to indicate the maximum days to keep files. 
     -t (default is ~/.Trash) Set the directory where you want files to move to. 
     -c Set a cron job
-
+    -r Remove a cron job
     -h Show help
     -v Show version
 
@@ -122,25 +122,7 @@ fn_cron() {
         echo "Creating ${plist_path}/${plist_name}"
         mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
     fi
-    # replace username, workingdirectory, hour, minute
-    # echo "Writing on plist."
-    # SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-    # check if it is a symlink
-    # if [[ -L "$script_dir/$(basename $0)" ]]; then
-    #     # if it is, sed won't work so change it to the actual script dir using pwd
-    #     # cd ${SCRIPT_DIR}
-    #     echo "It's a symlink"
-    #     ACTUAL=$(readlink $(which $script_name))
-    #     ACTUAL_DIR=${ACTUAL%/*}
-    # else
-    #     ACTUAL_DIR="${SCRIPT_DIR}"
-    # fi
-    # echo "PWD is $(pwd)"
-    # echo "basename is $(basename $0)"
     sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
-    # launchd
-    # mkdir -p ~/.cleanit
-    # check ~/.cleanit dir
     if [[ ! -d "$HOME/.cleanit" ]]; then
         mkdir "$HOME/.cleanit"
     fi
@@ -192,6 +174,10 @@ while (($# > 0)); do
         TO_DIR="${2}"
         shift 2
         ;;
+    -r | --remove)
+        REMOVE="true"
+        shift 1
+        ;;
     -c | --cron)
         CRON="true"
         shift 1
@@ -232,6 +218,11 @@ fi
 if [[ $DAYS -lt 0 ]]; then
     echo "Days must be greater then 0."
     exit 1
+fi
+
+if [[ ${REMOVE} = "true" ]]; then
+    launchctl unload "$HOME/Library/LaunchAgents/local.cleanit.plist"
+    exit
 fi
 
 if [[ ${CRON} = "true" ]]; then
