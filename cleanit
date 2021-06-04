@@ -71,7 +71,7 @@ fn_num() {
     local days=${2}
     # echo $from_dir
     # echo $days
-    echo $(find "${from_dir}" -mtime +"${days}" | wc -l | xargs)
+    find "${from_dir}" -mtime +"${days}" | wc -l | xargs
 }
 
 fn_script_dir() {
@@ -81,10 +81,10 @@ fn_script_dir() {
         # check if installation is Homebrew
         # if so use script_dir=/opt/homebrew/Cellar/backpack_install/${version}/bin
         if [[ "$which_install" == *"homebrew"* ]]; then
-            script_dir="/opt/homebrew/Cellar/"${script_name}"/${version}/bin"
+            script_dir="/opt/homebrew/Cellar/${script_name}/${version}/bin"
         else
-            link=$(readlink ${which_install})
-            script_dir=$(dirname ${link})
+            link=$(readlink "${which_install}")
+            script_dir=$(dirname "${link}")
         fi
     else
         script_dir="./"
@@ -96,18 +96,26 @@ script_dir=$(fn_script_dir)
 # echo "echo from script_dir: ${script_dir}"
 
 fn_cron() {
-    local plist_name="local.cleanit.plist"
-    local plist_path="$HOME/Library/LaunchAgents"
-    local launchd_name="cleanit-launchd"
-    local launchd_path="$HOME/.cleanit/"
-    local launchd_file="${launchd_path}${launchd_name}"
+    local plist_name
+    $plist_name="local.cleanit.plist"
+    local plist_path
+    $plist_path="$HOME/Library/LaunchAgents"
+    local launchd_name
+    $launchd_name="cleanit-launchd"
+    local launchd_path
+    $launchd_path="$HOME/.cleanit/"
+    local launchd_file
+    $launchd_file="${launchd_path}${launchd_name}"
     # local crondays=30
-    local username=$(whoami)
+    local username
+    $username=$(whoami)
     local days=${1}
     local minute=${2}
     local hour=${3}
-    local cleanitpath=$(which $script_name)
-    local notifierpath=$(which terminal-notifier)
+    local cleanitpath
+    $cleanitpath=$(which $script_name)
+    local notifierpath
+    $notifierpath=$(which terminal-notifier)
     # echo ${pathtocleanit}
     # exit
     # echo $days
@@ -172,9 +180,9 @@ CRON="false"
 
 # No parameter
 if [[ $# = 0 ]]; then
-    NUM=$(fn_num $FROM_DIR $DAYS)
+    NUM=$(fn_num "$FROM_DIR" "$DAYS")
     move_to_trash
-    echo "Moved ${NUM} files older than ${DAYS} days in the $(basename ${FROM_DIR}) to $(basename ${TO_DIR})."
+    echo "Moved ${NUM} files older than ${DAYS} days in the $(basename "${FROM_DIR}") to $(basename "${TO_DIR}")."
     exit 0
 fi
 
@@ -219,10 +227,10 @@ done
 
 if [[ "$FROM_DIR" =~ "trash" ]]; then
     fn_check_trash_access
-    NUM=$(fn_num $HOME/.Trash $DAYS)
+    NUM=$(fn_num "$HOME"/.Trash "$DAYS")
     # NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
 elif [[ -d $FROM_DIR ]]; then
-    NUM=$(fn_num $FROM_DIR $DAYS)
+    NUM=$(fn_num "$FROM_DIR" "$DAYS")
     # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
 else
     echo "No such directory: $FROM_DIR"
@@ -235,8 +243,8 @@ if [[ $DAYS -lt 0 ]]; then
 fi
 
 if [[ ${CRON} = "true" ]]; then
-    if [[ (! -z "$MINUTE") && (! -z "$HOUR") ]]; then
-        fn_cron ${DAYS} ${MINUTE} ${HOUR}
+    if [[ (-n "$MINUTE") && (-n "$HOUR") ]]; then
+        fn_cron "${DAYS}" "${MINUTE}" "${HOUR}"
     else
         echo "You must provide -o hour and -m minute."
         exit 1
@@ -260,7 +268,7 @@ if [[ $NUM -gt 0 ]]; then
             echo "Can't move to trash, exiting script!"
             exit 1
         }
-        echo "Hi, Moved $NUM files older than $DAYS days in the $(basename $FROM_DIR) to $(basename $TO_DIR)."
+        echo "Hi, Moved $NUM files older than $DAYS days in the $(basename "$FROM_DIR") to $(basename "$TO_DIR")."
         exit 0
     fi
 else
