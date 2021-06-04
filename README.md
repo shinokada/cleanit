@@ -19,6 +19,44 @@ For cron job, you need to allow BOTH of Terminal.app and /bin/bash Full Disk per
 
 When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 
+## Installation
+
+### Homebrew
+
+```sh
+brew tap shinokada/cleanit && brew install cleanit
+```
+
+### Awesome
+
+The `awesome` is a simple script package manager. It creates the `~/awesome` directory and the `~/bin` directory if they don't exist. When you install a script package in the `~/awesome` directory and, it creates a symlink in the `~/bin` directory.
+
+Install [`awesome`](https://github.com/shinokada/awesome) first:
+
+```sh
+curl -s https://raw.githubusercontent.com/shinokada/awesome/main/install | bash -s install
+```
+
+Then install `cleanit`:
+
+```sh
+awesome install cleanit
+```
+
+## Uninstallation
+
+### Homebrew unistall
+
+```sh
+brew uninstall cleanit
+```
+
+### Awesome unistall
+
+```sh
+awesome uninstall cleanit
+```
+
 ## Examples
 
 Move files older than 20 days in ~/Downloads to ~/.Trash

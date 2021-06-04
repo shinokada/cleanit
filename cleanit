@@ -46,7 +46,7 @@ EOF
 
 fn_check_trash_access() {
     if [[ ! -r $HOME/.Trash ]]; then
-        echo "Give the Terminal.app Full Disk permission in the security settings. See the README."
+        echo "Give the Terminal.app Full Disk permission in the security settings. See the README." >&2
         exit 1
     fi
 }
@@ -69,8 +69,6 @@ remove_from_trash() {
 fn_num() {
     local from_dir=${1}
     local days=${2}
-    # echo $from_dir
-    # echo $days
     find "${from_dir}" -mtime +"${days}" | wc -l | xargs
 }
 
@@ -93,34 +91,30 @@ fn_script_dir() {
 }
 
 script_dir=$(fn_script_dir)
-# echo "echo from script_dir: ${script_dir}"
 
 fn_cron() {
     local plist_name
-    $plist_name="local.cleanit.plist"
+    plist_name="local.cleanit.plist"
     local plist_path
-    $plist_path="$HOME/Library/LaunchAgents"
+    plist_path="$HOME/Library/LaunchAgents"
     local launchd_name
-    $launchd_name="cleanit-launchd"
+    launchd_name="cleanit-launchd"
     local launchd_path
-    $launchd_path="$HOME/.cleanit/"
+    launchd_path="$HOME/.cleanit/"
     local launchd_file
-    $launchd_file="${launchd_path}${launchd_name}"
+    launchd_file="${launchd_path}${launchd_name}"
     # local crondays=30
     local username
-    $username=$(whoami)
+    username=$(whoami)
     local days=${1}
     local minute=${2}
     local hour=${3}
     local cleanitpath
-    $cleanitpath=$(which $script_name)
+    cleanitpath=$(which "$script_name")
     local notifierpath
-    $notifierpath=$(which terminal-notifier)
-    # echo ${pathtocleanit}
-    # exit
-    # echo $days
+    notifierpath=$(which terminal-notifier)
+
     # create a directory LaunchAgents and plist and save it to "${plist_path}/${plist_name}"
-    # echo $plist_path
     if [[ -d "${plist_path}" ]]; then
         # echo "cron 1a"
         echo "Creating a dir and a file, ${plist_path}/${plist_name}"
@@ -130,21 +124,7 @@ fn_cron() {
         echo "Creating ${plist_path}/${plist_name}"
         mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
     fi
-    # replace username, workingdirectory, hour, minute
-    # echo "Writing on plist."
-    # SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-    # check if it is a symlink
-    # if [[ -L "$script_dir/$(basename $0)" ]]; then
-    #     # if it is, sed won't work so change it to the actual script dir using pwd
-    #     # cd ${SCRIPT_DIR}
-    #     echo "It's a symlink"
-    #     ACTUAL=$(readlink $(which $script_name))
-    #     ACTUAL_DIR=${ACTUAL%/*}
-    # else
-    #     ACTUAL_DIR="${SCRIPT_DIR}"
-    # fi
-    # echo "PWD is $(pwd)"
-    # echo "basename is $(basename $0)"
+
     sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
     # launchd
     # mkdir -p ~/.cleanit
@@ -233,12 +213,12 @@ elif [[ -d $FROM_DIR ]]; then
     NUM=$(fn_num "$FROM_DIR" "$DAYS")
     # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
 else
-    echo "No such directory: $FROM_DIR"
+    echo "No such directory: $FROM_DIR" >&2
     exit 2
 fi
 
 if [[ $DAYS -lt 0 ]]; then
-    echo "Days must be greater then 0."
+    echo "Days must be greater then 0." >&2
     exit 1
 fi
 
@@ -246,7 +226,7 @@ if [[ ${CRON} = "true" ]]; then
     if [[ (-n "$MINUTE") && (-n "$HOUR") ]]; then
         fn_cron "${DAYS}" "${MINUTE}" "${HOUR}"
     else
-        echo "You must provide -o hour and -m minute."
+        echo "You must provide -o hour and -m minute." >&2
         exit 1
     fi
 fi
@@ -257,7 +237,7 @@ if [[ $NUM -gt 0 ]]; then
     if [[ "$FROM_DIR" =~ "trash" ]]; then
         # remove files from Trash permanently
         remove_from_trash || {
-            echo "Can't remove from the directory, exiting script!"
+            echo "Can't remove from the directory, exiting script!" >&2
             exit 1
         }
         echo "Removed $NUM files older than $DAYS days from ~/.Trash."
@@ -265,7 +245,7 @@ if [[ $NUM -gt 0 ]]; then
     else
         # move files to Trash
         move_to_trash || {
-            echo "Can't move to trash, exiting script!"
+            echo "Can't move to trash, exiting script!" >&2
             exit 1
         }
         echo "Hi, Moved $NUM files older than $DAYS days in the $(basename "$FROM_DIR") to $(basename "$TO_DIR")."
