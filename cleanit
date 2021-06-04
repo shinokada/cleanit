@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.1.3"
+version="0.1.4"
 script_dir=""
 
 usage() {
@@ -141,10 +141,19 @@ fn_cron() {
     # make the executable
     chmod +x "${launchd_file}"
     # unload the job
-    launchctl unload "${plist_path}/${plist_name}" || exit
+    launchctl unload "${plist_path}/${plist_name}" || exit 1
     # load the job
-    launchctl load "${plist_path}/${plist_name}" || exit
+    launchctl load "${plist_path}/${plist_name}" || exit 1
     launchctl list | grep "$plist_name"
+    exit
+}
+
+fn_remove_cron() {
+    local plist_name
+    plist_name="local.cleanit.plist"
+    local plist_path
+    plist_path="$HOME/Library/LaunchAgents"
+    launchctl unload -w "${plist_path}/${plist_name}" || exit 1
     exit
 }
 
@@ -182,6 +191,10 @@ while (($# > 0)); do
         ;;
     -c | --cron)
         CRON="true"
+        shift 1
+        ;;
+    -r | --remove)
+        fn_remove_cron
         shift 1
         ;;
     -o | --hour)

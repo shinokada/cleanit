@@ -91,6 +91,12 @@ cleanit -c -o 10 -m 0 -d 30
 
 This will set cronjob removing files older than 30 days (default 20 days) everyday at 8:00 am. The default days for Downloads directory is fixed at 20 days.
 
+Remove a cron job:
+
+```sh
+cleanit -r
+```
+
 ## Author
 
 Shinichi Okada
