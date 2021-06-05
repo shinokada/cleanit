@@ -64,30 +64,40 @@ awesome uninstall cleanit
 Move files older than 20 days in ~/Downloads to ~/.Trash
 
 ```sh
+# macOS
 cleanit
+# Linux
+cleanit -f /path/to/dir -t /path/to/trash
 ```
 
 Move files older than 10 days in ~/Mydir to ~/.Trash
 
 ```sh
+# macOS
 cleanit -d 10 -f ~/Mydir
+# Linux
+cleanit -d 10 -f '/path/to/dir' -t '/path/to/trash'
 ```
 
 Move files older than 5 days in ~/Mydir to ~/Anotherdir
 
 ```sh
-cleanit -f ~/Mydir -d 5 -t ~/Anotherdir
+cleanit -d 5 -f ~/Mydir -t ~/Anotherdir
 ```
 
 You can clean up the Trash directory.
 
 ```sh
+# macOS
 cleanit -d 30 -f trash
+# Linux
+cleanit -d 30 -f /path/to/trash
 ```
 
 This will remove files older than 30 days from `~.Trash` directory
 
 ```sh
+# only macOS
 cleanit -c -o 10 -m 0 -d 30
 ```
 
