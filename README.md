@@ -2,6 +2,8 @@
 
 ## Overview
 
+Cleanit cleanup your `~/Downloads` and `~/.Trash` directory, and set the cleanup schedule.
+
 Cleanit moves files older than 20 days (default) from a directory (default ~/Downloads) to another directory (default ~/.Trash).
 
 ```sh
@@ -21,17 +23,15 @@ When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 
 ## Installation
 
-### Homebrew
+### macOS Homebrew
 
 ```sh
 brew tap shinokada/cleanit && brew install cleanit
 ```
 
-### Awesome
+### macOS/Linux [Awesome](https://github.com/shinokada/awesome)
 
-The `awesome` is a simple script package manager. It creates the `~/awesome` directory and the `~/bin` directory if they don't exist. When you install a script package in the `~/awesome` directory and, it creates a symlink in the `~/bin` directory.
-
-Install [`awesome`](https://github.com/shinokada/awesome) first:
+Install [`awesome` script package manager](https://github.com/shinokada/awesome) first:
 
 ```sh
 curl -s https://raw.githubusercontent.com/shinokada/awesome/main/install | bash -s install
@@ -42,6 +42,8 @@ Then install `cleanit`:
 ```sh
 awesome install cleanit
 ```
+
+Linux user must specify your Downloads directory and Trash directory using `-f /path/to/Downloads` and `-t /path/to/Trash`.
 
 ## Uninstallation
 

@@ -44,6 +44,25 @@ Examples:
 EOF
 }
 
+fn_check_cmd() {
+    if [[ ! $(command -v "$1") ]]; then
+        echo "It seems like you don't have $1." >&2
+        echo "Please install $1 or add the PATH to .zshrc or .bash_profile." >&2
+        exit 1
+    fi
+}
+
+fn_find_os() {
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        OS="linux"
+        # OS=$(dirname "$(readlink -f "$0")")
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        OS="macos"
+        # OS=$(dirname "$(greadlink -f "$0")")
+    fi
+    echo $OS
+}
+
 fn_check_trash_access() {
     if [[ ! -r $HOME/.Trash ]]; then
         echo "Give the Terminal.app Full Disk permission in the security settings. See the README." >&2
@@ -162,10 +181,20 @@ fn_remove_cron() {
 
 unset FROM_DIR TO_DIR DAYS
 
-FROM_DIR=$HOME/Downloads
-TO_DIR=$HOME/.Trash
+# if OS is macOS
+if [[ $(fn_find_os) = "macos" ]]; then
+    FROM_DIR=$HOME/Downloads
+    TO_DIR=$HOME/.Trash
+else
+    # for Linux make them empty
+    FROM_DIR=""
+    TO_DIR=""
+fi
 DAYS=20
 CRON="false"
+
+# check commands
+fn_check_cmd link
 
 # No parameter
 if [[ $# = 0 ]]; then
@@ -216,7 +245,9 @@ while (($# > 0)); do
     esac
 done
 
-[ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && usage
+[ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && echo "You must be using Linux. Please provide -t and -f" && usage
+
+# if OS is Linux then it must provide -t and -f
 
 if [[ "$FROM_DIR" =~ "trash" ]]; then
     fn_check_trash_access
