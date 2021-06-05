@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.1.4"
+version="0.1.5"
 script_dir=""
 
 usage() {
@@ -141,9 +141,9 @@ fn_cron() {
     # make the executable
     chmod +x "${launchd_file}"
     # unload the job
-    launchctl unload "${plist_path}/${plist_name}" || exit 1
+    launchctl unload -w "${plist_path}/${plist_name}" || exit 1
     # load the job
-    launchctl load "${plist_path}/${plist_name}" || exit 1
+    launchctl load -w "${plist_path}/${plist_name}" || exit 1
     launchctl list | grep "$plist_name"
     exit
 }
