@@ -31,18 +31,12 @@ When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 brew tap shinokada/cleanit && brew install cleanit
 ```
 
-### macOS/Linux [Awesome](https://github.com/shinokada/awesome)
+### Using [Awesome Package Manager](https://github.com/shinokada/awesome) for macOS/Linux
 
-Install [`awesome` script package manager](https://github.com/shinokada/awesome) first:
-
-```sh
-curl -s https://raw.githubusercontent.com/shinokada/awesome/main/install | bash -s install
-```
-
-Then install `cleanit`:
+After installing the [`awesome` script package manager](https://github.com/shinokada/awesome):
 
 ```sh
-awesome install cleanit
+awesome -i cleanit
 ```
 
 Linux user must specify your Downloads directory and Trash directory using `-f /path/to/Downloads` and `-t /path/to/Trash`.
@@ -58,7 +52,7 @@ brew uninstall cleanit
 ### Awesome unistall
 
 ```sh
-awesome uninstall cleanit
+awesome rm cleanit
 ```
 
 ## Examples
