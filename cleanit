@@ -156,7 +156,6 @@ fn_cron() {
     # replace $days in cleanit-launchd and write to the file
     # since path has /, use # in sed changenotifierpath
     sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${script_dir}/${launchd_name}" >"${launchd_file}" || exit 1
-    echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     # make the executable
     chmod +x "${launchd_file}"
     # if plist exist, unload it first
@@ -166,6 +165,7 @@ fn_cron() {
     fi
     # load the job
     launchctl load -w "${plist_path}/${plist_name}" || exit 1
+    echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     launchctl list | grep "$plist_name"
     exit
 }
@@ -175,9 +175,11 @@ fn_remove_cron() {
     plist_name="local.cleanit.plist"
     local plist_path
     plist_path="$HOME/Library/LaunchAgents"
+    echo "Removing ${plist_path}/${plist_name} ..."
     if [[ -e "${plist_path}/${plist_name}" ]]; then
         launchctl unload -w "${plist_path}/${plist_name}" || exit 1
     fi
+    echo "Removed the file."
     exit
 }
 
