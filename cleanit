@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.1.8"
+version="0.2.0"
 script_dir=""
 
 usage() {
@@ -109,7 +109,14 @@ fn_script_dir() {
     echo $script_dir
 }
 
-script_dir=$(fn_script_dir)
+# from awesome script
+if [[ -z $(which "$0") ]]; then
+    script_dir=$(realpath "$0")
+else
+    script_dir=$(realpath "$(which "${script_name}")")
+fi
+
+# script_dir=$(fn_script_dir)
 
 fn_cron() {
     local plist_name
@@ -202,6 +209,7 @@ CRON="false"
 
 # check commands
 fn_check_cmd link
+fn_check_cmd realpath
 
 # No parameter
 if [[ $# = 0 ]]; then
@@ -252,10 +260,10 @@ while (($# > 0)); do
     esac
 done
 
+# if OS is Linux then it must provide -t and -f
 [ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && echo "You must be using Linux. Please provide -t and -f" && usage
 
-# if OS is Linux then it must provide -t and -f
-
+# Ubuntu has trash at /home/username/.local/share/Trash
 if [[ "$FROM_DIR" =~ "trash" ]]; then
     fn_check_trash_access
     NUM=$(fn_num "$HOME"/.Trash "$DAYS")

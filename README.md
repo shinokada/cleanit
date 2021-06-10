@@ -23,6 +23,20 @@ For cron job, you need to allow BOTH of Terminal.app and /bin/bash Full Disk per
 
 When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 
+- coreutils
+
+Install `coreutils` on macOS:
+
+```sh
+brew install coreutils
+```
+
+Install it on Ubuntu:
+
+```sh
+apt install coreutils
+```
+
 ## Installation
 
 ### macOS Homebrew
