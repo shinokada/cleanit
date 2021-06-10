@@ -185,7 +185,7 @@ fn_remove_cron() {
     plist_path="$HOME/Library/LaunchAgents"
     echo "Removing ${plist_path}/${plist_name} ..."
     if [[ -e "${plist_path}/${plist_name}" ]]; then
-        launchctl unload -w "${plist_path}/${plist_name}" || exit 1
+        launchctl unload -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
     fi
     echo "Removed the file."
     exit
