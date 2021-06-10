@@ -39,18 +39,25 @@ apt install coreutils
 
 ## Installation
 
-### macOS Homebrew
+### macOS x86_64/Linux using Homebrew
 
 ```sh
 brew tap shinokada/cleanit && brew install cleanit
 ```
+
+### macOS M1 chip/arm64
+
+Install using Awesome package manager. See the next section.
 
 ### Using [Awesome Package Manager](https://github.com/shinokada/awesome) for macOS/Linux
 
 After installing the [`awesome` script package manager](https://github.com/shinokada/awesome):
 
 ```sh
-awesome -i cleanit
+awesome -i shinokada/cleanit
+brew install terminal-notifier
+brew install bash
+brew install coreutils
 ```
 
 Linux user must specify your Downloads directory and Trash directory using `-f /path/to/Downloads` and `-t /path/to/Trash`.
