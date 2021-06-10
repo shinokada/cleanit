@@ -91,29 +91,30 @@ fn_num() {
     find "${from_dir}" -mtime +"${days}" | wc -l | xargs
 }
 
-fn_script_dir() {
-    which_install=$(which "${script_name}")
+# fn_script_dir() {
+#     which_install=$(which "${script_name}")
 
-    if [[ -L $which_install ]]; then
-        # check if installation is Homebrew
-        # if so use script_dir=/opt/homebrew/Cellar/backpack_install/${version}/bin
-        if [[ "$which_install" == *"homebrew"* ]]; then
-            script_dir="/opt/homebrew/Cellar/${script_name}/${version}/bin"
-        else
-            link=$(readlink "${which_install}")
-            script_dir=$(dirname "${link}")
-        fi
-    else
-        script_dir="./"
-    fi
-    echo $script_dir
-}
+#     if [[ -L $which_install ]]; then
+#         # check if installation is Homebrew
+#         # if so use script_dir=/opt/homebrew/Cellar/backpack_install/${version}/bin
+#         if [[ "$which_install" == *"homebrew"* ]]; then
+#             script_dir="/opt/homebrew/Cellar/${script_name}/${version}/bin"
+#         else
+#             link=$(readlink "${which_install}")
+#             script_dir=$(dirname "${link}")
+#         fi
+#     else
+#         script_dir="./"
+#     fi
+#     echo $script_dir
+# }
 
 # from awesome script
 if [[ -z $(which "$0") ]]; then
     script_dir=$(realpath "$0")
 else
     script_dir=$(realpath "$(which "${script_name}")")
+    script_dir=${script_dir%/*}
 fi
 
 # script_dir=$(fn_script_dir)
