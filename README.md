@@ -19,7 +19,10 @@ Usage:  cleanit [ -f ] [ -d ] [ -t ][ -h ]
 
 The cron job works for macOS only.
 
-For cron job, you need to allow BOTH of Terminal.app and /bin/bash Full Disk permissions in the security settings. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
+For cron job, you need to allow **BOTH** of Terminal.app and `/bin/bash` Full Disk permissions in the security settings. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
+
+![bin/bash](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bin-bash.png)
+
 
 When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
 
