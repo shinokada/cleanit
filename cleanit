@@ -47,7 +47,15 @@ EOF
 fn_check_cmd() {
     if [[ ! $(command -v "$1") ]]; then
         echo "It seems like you don't have $1." >&2
-        echo "Please install $1 or add the PATH to .zshrc or .bash_profile." >&2
+        echo "Please install $1 by running brew install $1" >&2
+        exit 1
+    fi
+}
+
+fn_check_realpath() {
+    if [[ ! $(command -v realpath) ]]; then
+        echo "It seems like you don't have coreutils." >&2
+        echo "Please install coreutils by running brew install coreutils" >&2
         exit 1
     fi
 }
@@ -90,24 +98,6 @@ fn_num() {
     local days=${2}
     find "${from_dir}" -mtime +"${days}" | wc -l | xargs
 }
-
-# fn_script_dir() {
-#     which_install=$(which "${script_name}")
-
-#     if [[ -L $which_install ]]; then
-#         # check if installation is Homebrew
-#         # if so use script_dir=/opt/homebrew/Cellar/backpack_install/${version}/bin
-#         if [[ "$which_install" == *"homebrew"* ]]; then
-#             script_dir="/opt/homebrew/Cellar/${script_name}/${version}/bin"
-#         else
-#             link=$(readlink "${which_install}")
-#             script_dir=$(dirname "${link}")
-#         fi
-#     else
-#         script_dir="./"
-#     fi
-#     echo $script_dir
-# }
 
 # from awesome script
 if [[ -z $(which "$0") ]]; then
@@ -210,7 +200,9 @@ CRON="false"
 
 # check commands
 fn_check_cmd link
-fn_check_cmd realpath
+fn_check_cmd terminal-notifier
+fn_check_cmd bash
+fn_check_realpath
 
 # No parameter
 if [[ $# = 0 ]]; then
