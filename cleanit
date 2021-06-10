@@ -169,10 +169,10 @@ fn_cron() {
     # if plist exist, unload it first
     if [[ -e "${plist_path}/${plist_name}" ]]; then
         # unload the job
-        launchctl unload -w "${plist_path}/${plist_name}" || exit 1
+        launchctl unload -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
     fi
     # load the job
-    launchctl load -w "${plist_path}/${plist_name}" || exit 1
+    launchctl load -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
     echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     launchctl list | grep "$plist_name"
     exit
