@@ -129,7 +129,7 @@ remove_from() {
         echo "Checking Trash access ..."
         fn_check_trash_access
     fi
-    exit
+    echo "Removing files/dirs ..."
     # remove files
     find "$from" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
     # remove direcotries
