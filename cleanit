@@ -108,16 +108,6 @@ remove_from_trash() {
     return 0
 }
 
-remove_from() {
-    from=$1
-
-    # remove files
-    find "$from" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
-    # remove direcotries
-    find "$from"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
-    return 0
-}
-
 fn_num() {
     local from_dir=${1}
     local days=${2}
@@ -132,6 +122,20 @@ else
     script_dir=${script_dir%/*}
 fi
 
+remove_from() {
+    NUM=$(fn_num "$FROM_DIR" "$DAYS")
+    from=$1
+    if [ "$1" = "$trash_dir" ]; then
+        echo "Checking Trash access ..."
+        fn_check_trash_access
+    fi
+    exit
+    # remove files
+    find "$from" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    # remove direcotries
+    find "$from"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    echo "Removed $NUM files older than $DAYS days from $from"
+}
 # script_dir=$(fn_script_dir)
 
 fn_cron() {
@@ -256,11 +260,11 @@ while (($# > 0)); do
         shift 1
         ;;
     downloads)
-        clean_downloads
+        remove_from "$downloads_dir"
         exit
         ;;
     trash)
-        clean_trash
+        remove_from "$trash_dir"
         exit
         ;;
     -r | --remove)

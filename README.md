@@ -29,11 +29,25 @@ cleanit -r
 
 ## Prerequisite
 
-For cron job, you need to allow **BOTH** of Terminal.app and `/bin/bash` Full Disk permissions in the security settings. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
+For cron job, you need to allow **BOTH** of Terminal.app and `/bin/bash` Full Disk permissions in the security settings.
+
+Find out your bash location first:
+
+```sh
+which bash
+```
+
+When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
+
+![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
+
+Apple x86_64
 
 ![bin/bash](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bin-bash.png)
 
-When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
+Apple M1 chip/ARM64
+
+![bin/bash](https://raw.githubusercontent.com/shinokada/cleanit/main/images/homebrew-bash.png)
 
 ## Installation
 
