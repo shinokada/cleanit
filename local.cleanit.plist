@@ -17,6 +17,8 @@
         <string>/tmp/cleanit.stdout</string>
         <key>StandardErrorPath</key>
         <string>/tmp/cleanit.stderr</string>
+        <key>WorkingDirectory</key>
+        <string>/Users/changeusername/.cleanit</string>
         <key>StartCalendarInterval</key>
         <dict>
             <key>Hour</key>
