@@ -132,7 +132,7 @@ remove_from_trash() {
         exit 1
     }
     # remove direcotries
-    find "$trash_dir"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
+    find "$trash_dir" -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
         echo "Something went wrong 2."
         exit 1
     }
