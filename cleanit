@@ -176,13 +176,13 @@ fn_cron() {
 
     # create a directory LaunchAgents and plist and save it to "${plist_path}/${plist_name}"
     if [[ -d "${plist_path}" ]]; then
+        echo "Creating ${plist_path}/${plist_name}"
+        mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
+    else
         # echo "cron 1a"
         echo "Creating a dir and a file, ${plist_path}/${plist_name}"
         touch "${plist_path}/${plist_name}"
         echo "A plist created."
-    else
-        echo "Creating ${plist_path}/${plist_name}"
-        mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
     fi
 
     sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
