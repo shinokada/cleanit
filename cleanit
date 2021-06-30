@@ -14,12 +14,20 @@ usage() {
 Name: $script_name
 Description: This script moves files older than 20 days from a directory (default ~/Downloads) to another directory (default ~/.Trash).
 
-Usage:  $script_name [ -f ] [ -d ] [ -t ][ -h ][ -v ]
-    -f target-directory (~/Download as default) 
-    -d (Default is 20) Set days to indicate the maximum days to keep files. 
-    -t (default is ~/.Trash) Set the directory where you want files to move to. 
-    -c Set a cron job
+Usage:
+$script_name
+$script_name [-f <dir>][-t <dir>][-D <number>] 
+$script_name cron -H <hour> -M <minute> [-D <number>]
+$script_name -r
 
+Options: 
+
+    -f  target-directory [default: ~/Download as default]
+    -t  Set the directory where you want files to move to. [default: ~/.Trash]
+    -r  Remove a cronjob
+    -D  Set days to indicate the maximum days to keep files. [default: 20]
+    -H  Set the hour to a cronjob
+    -M  Set the min to a cronjob
     -h Show help
     -v Show version
 
@@ -27,19 +35,20 @@ Examples:
     Move files older than 20 days in ~/Downloads to ~/.Trash
     $script_name
 
-    $script_name -f ~/Mydir
-
     Move files older than 10 days in ~/Mydir to ~/.Trash
-    $script_name -d 10 -f ~/Mydir
+    $script_name -D 10 -f ~/Mydir
 
     Move files older than 5 days in ~/Mydir to ~/Anotherdir
-    $script_name -f ~/Mydir -d 5 -t ~/Anotherdir
+    $script_name -f ~/Mydir -D 5 -t ~/Anotherdir
 
     Clean up Trash
     $script_name -f trash
 
     Set a cron job to remove files that are older than 30 days at 13:30 everyday.
-    $script_name -c -d 30 -o 13 -m 30
+    $script_name cron -D 30 -H 13 -M 30
+
+    Remove a cronjob
+    $script_name -r
 
 EOF
 }
@@ -218,7 +227,7 @@ while (($# > 0)); do
         FROM_DIR="${2}"
         shift 2
         ;;
-    -d | --days)
+    -D | --days)
         DAYS="${2}"
         shift 2
         ;;
@@ -226,7 +235,7 @@ while (($# > 0)); do
         TO_DIR="${2}"
         shift 2
         ;;
-    -c | --cron)
+    cron)
         CRON="true"
         shift 1
         ;;
@@ -234,11 +243,11 @@ while (($# > 0)); do
         fn_remove_cron
         shift 1
         ;;
-    -o | --hour)
+    -H | --hour)
         HOUR=${2}
         shift 2
         ;;
-    -m | --minute)
+    -M | --minute)
         MINUTE=${2}
         shift 2
         ;;
