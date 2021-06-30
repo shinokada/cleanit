@@ -70,7 +70,7 @@ Examples:
     $script_name -f trash
 
     Set a cron job to remove files that are older than 30 days at 13:30 everyday.
-    $script_name cron -D 30 -H 13 -M 30
+    $script_name cron -H 13 -M 30 -D 30
 
     Remove a cronjob
     $script_name -r
@@ -301,7 +301,7 @@ while (($# > 0)); do
 done
 
 # if OS is Linux then it must provide -t and -f
-[ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && echo "You must be using Linux. Please provide -t and -f" && usage
+[ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && echo "Please provide -t and -f" && usage
 
 # Ubuntu has trash at /home/username/.local/share/Trash
 if [[ "$FROM_DIR" =~ "trash" ]]; then
