@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 # path to notifier
-notifier=changenotifierpath
+# notifier=changenotifierpath
 # path to cleanit
-cleanit=changecleanitpath
+# cleanit=changecleanitpath
 # clean-up Download
 # store the output to a variable
-download_notice=$($cleanit -D changedays downloads)
+download_notice=$(changecleanitpath -D changedays downloads)
 # clean-up Trash
-trash_notice=$($cleanit -D changedays trash)
+trash_notice=$(changecleanitpath -D changedays trash)
 
-$notifier -title Cleanit -message "Downloads cleanup: ${download_notice}"
-$notifier -title Cleanit -message "Trash cleanup: ${trash_notice}"
+changenotifierpath -title Cleanit -message "Downloads cleanup: ${download_notice}"
+changenotifierpath -title Cleanit -message "Trash cleanup: ${trash_notice}"
