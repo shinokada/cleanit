@@ -108,16 +108,6 @@ move_to_trash() {
     return 0
 }
 
-remove_from_trash() {
-    local trash=$HOME/.Trash
-
-    # remove files
-    find "$trash" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
-    # remove direcotries
-    find "$trash"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
-    return 0
-}
-
 fn_num() {
     local from_dir=${1}
     local days=${2}
@@ -133,10 +123,9 @@ else
 fi
 
 remove_from_trash() {
-    echo "Checking Trash access ..."
     NUM=$(fn_num "$trash_dir" "$DAYS")
     fn_check_trash_access
-    echo "Removing files/dirs ..."
+    # echo "Removing files/dirs ..."
     # remove files
     find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
     # remove direcotries
@@ -146,7 +135,7 @@ remove_from_trash() {
 
 remove_from_downloads() {
     NUM=$(fn_num "$downloads_dir" "$DAYS")
-    echo "Removing files/dirs ..."
+    # echo "Removing files/dirs ..."
     move_to_trash
     echo "Removed $NUM files older than $DAYS days from $downloads_dir"
 }

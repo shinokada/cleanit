@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # path to notifier
 notifier=changenotifierpath
@@ -6,9 +6,9 @@ notifier=changenotifierpath
 cleanit=changecleanitpath
 # clean-up Download
 # store the output to a variable
-download_notice=$($cleanit)
+download_notice=$($cleanit downloads)
 # clean-up Trash
-trash_notice=$($cleanit -f trash -D changedays)
+trash_notice=$($cleanit trash -D changedays)
 
 $notifier -title Cleanit -subtitle "Daily Clean-up" -message "Downloads cleanup: ${download_notice}"
 $notifier -title Cleanit -subtitle "Daily Clean-up" -message "Trash cleanup: ${trash_notice}"
