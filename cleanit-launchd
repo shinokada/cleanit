@@ -6,9 +6,9 @@ notifier=changenotifierpath
 cleanit=changecleanitpath
 # clean-up Download
 # store the output to a variable
-download_notice=$($cleanit downloads -D changedays)
+download_notice=$($cleanit -D changedays downloads)
 # clean-up Trash
-trash_notice=$($cleanit trash -D changedays)
+trash_notice=$($cleanit -D changedays trash)
 
 $notifier -title Cleanit -message "Downloads cleanup: ${download_notice}"
 $notifier -title Cleanit -message "Trash cleanup: ${trash_notice}"
