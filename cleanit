@@ -34,8 +34,8 @@ Usage:
 
 $script_name [-f <dir>][-t <dir>][-D <number>] 
 $script_name cron -H <hour> -M <minute> [-D <number>]
-$script_name downloads [-D <number>]
-$script_name trash [-D <number>]
+$script_name [-D <number>] downloads
+$script_name [-D <number>] trash
 $script_name -r
 
 Options: 
@@ -103,6 +103,8 @@ fn_check_trash_access() {
     echo "You have access to Trash."
 }
 
+fn_check_trash_access
+
 move_to_trash() {
     find "$FROM_DIR" -mtime +"$DAYS" -exec mv {} "$TO_DIR" \; 2>/dev/null
     return 0
@@ -124,7 +126,6 @@ fi
 
 remove_from_trash() {
     NUM=$(fn_num "$trash_dir" "$DAYS")
-    fn_check_trash_access
     # echo "Removing files/dirs ..."
     # remove files
     find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
@@ -298,7 +299,6 @@ done
 
 # Ubuntu has trash at /home/username/.local/share/Trash
 if [[ "$FROM_DIR" =~ "trash" ]]; then
-    fn_check_trash_access
     NUM=$(fn_num "$HOME"/.Trash "$DAYS")
     # NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
 elif [[ -d $FROM_DIR ]]; then

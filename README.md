@@ -98,7 +98,7 @@ Clean up Downloads
 ```sh
 cleanit downloads
 # or
-cleanit-f downloads
+cleanit -f downloads
 ```
 
 Clean up Trash
@@ -124,7 +124,15 @@ cleanit -D 5 -f ~/Mydir -t ~/Anotherdir
 You can clean up the Trash directory.
 
 ```sh
-cleanit -D 30 -f trash
+cleanit -D 20 trash
+cleanit -D 20 -f trash
+```
+
+Cleanup the Downloads directory.
+
+```sh
+cleanit -D 10 downloads
+cleanit -D 10 -f downloads
 ```
 
 This will remove files older than 30 days from `~.Trash` directory
