@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.3.6"
+version="0.3.7"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
