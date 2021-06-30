@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.3.4"
+version="0.3.5"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
@@ -34,6 +34,8 @@ Usage:
 
 $script_name [-f <dir>][-t <dir>][-D <number>] 
 $script_name cron -H <hour> -M <minute> [-D <number>]
+$script_name downloads [-D <number>]
+$script_name trash [-D <number>]
 $script_name -r
 
 Options: 
@@ -57,7 +59,14 @@ Examples:
     Move files older than 5 days in ~/Mydir to ~/Anotherdir
     $script_name -f ~/Mydir -D 5 -t ~/Anotherdir
 
+    Clean up Downloads
+    $script_name downloads
+    or
+    $script_name -f downloads
+
     Clean up Trash
+    $script_name trash
+    or
     $script_name -f trash
 
     Set a cron job to remove files that are older than 30 days at 13:30 everyday.
@@ -91,6 +100,7 @@ fn_check_trash_access() {
         echo "Give the Terminal.app Full Disk permission in the security settings. See the README." >&2
         exit 1
     fi
+    echo "You have access to Trash."
 }
 
 move_to_trash() {
@@ -122,19 +132,23 @@ else
     script_dir=${script_dir%/*}
 fi
 
-remove_from() {
-    NUM=$(fn_num "$FROM_DIR" "$DAYS")
-    from=$1
-    if [ "$1" = "$trash_dir" ]; then
-        echo "Checking Trash access ..."
-        fn_check_trash_access
-    fi
+remove_from_trash() {
+    echo "Checking Trash access ..."
+    NUM=$(fn_num "$trash_dir" "$DAYS")
+    fn_check_trash_access
     echo "Removing files/dirs ..."
     # remove files
-    find "$from" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
     # remove direcotries
-    find "$from"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
-    echo "Removed $NUM files older than $DAYS days from $from"
+    find "$trash_dir"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
+    echo "Removed $NUM files older than $DAYS days from $trash_dir"
+}
+
+remove_from_downloads() {
+    NUM=$(fn_num "$downloads_dir" "$DAYS")
+    echo "Removing files/dirs ..."
+    move_to_trash
+    echo "Removed $NUM files older than $DAYS days from $downloads_dir"
 }
 # script_dir=$(fn_script_dir)
 
@@ -260,11 +274,11 @@ while (($# > 0)); do
         shift
         ;;
     downloads)
-        remove_from "$downloads_dir"
+        remove_from_downloads
         exit
         ;;
     trash)
-        remove_from "$trash_dir"
+        remove_from_trash
         exit
         ;;
     -r | --remove)

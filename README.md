@@ -11,6 +11,8 @@ Cleanit moves files older than 20 days (default) from a directory (default ~/Dow
 ```sh
 cleanit [-f <dir>][-t <dir>][-D <number>]
 cleanit cron -H <hour> -M <minute> [-D <number>]
+cleanit downloads [-D <number>]
+cleanit trash [-D <number>]
 cleanit -r
 ```
 
@@ -48,6 +50,8 @@ Apple x86_64
 Apple M1 chip/ARM64
 
 ![bin/bash](https://raw.githubusercontent.com/shinokada/cleanit/main/images/homebrew-bash.png)
+
+Restart your Mac.
 
 ## Installation
 
@@ -87,6 +91,22 @@ Move files older than 20 days in ~/Downloads to ~/.Trash
 
 ```sh
 cleanit
+```
+
+Clean up Downloads
+
+```sh
+cleanit downloads
+# or
+cleanit-f downloads
+```
+
+Clean up Trash
+
+```sh
+cleanit trash
+# or
+cleanit -f trash
 ```
 
 Move files older than 10 days in ~/Mydir to ~/.Trash
