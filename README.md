@@ -1,58 +1,49 @@
-# cleanit
+# Cleanit
 
 ## Overview
 
-Cleanit cleanup your `~/Downloads` and `~/.Trash` directory, and set the cleanup schedule.
+Cleanit cleanup your `~/Downloads` and `~/.Trash` directory, and set the cleanup schedule on your MacOS.
 
 Cleanit moves files older than 20 days (default) from a directory (default ~/Downloads) to another directory (default ~/.Trash).
 
+## Usage
+
 ```sh
-Usage:  cleanit [ -f ] [ -d ] [ -t ][ -h ]
-    -f target-directory (~/Downloads as default) 
-    -d (Default is 20) Set days to indicate the maximum days to keep files. 
-    -t (default is ~/.Trash) Set the directory where you want files to move to. 
-    -h Show help
-    -v Show version
+cleanit [-f <dir>][-t <dir>][-D <number>]
+cleanit cron -H <hour> -M <minute> [-D <number>]
+cleanit -r
+```
+
+## Options
+
+```sh
+-f  target-directory [default: ~/Download as default]
+-t  Set the directory where you want files to move to. [default: ~/.Trash]
+-r  Remove a cronjob
+-D  Set days to indicate the maximum days to keep files. [default: 20]
+-H  Set the hour to a cronjob
+-M  Set the min to a cronjob
+-h Show help
+-v Show version
 ```
 
 ## Prerequisite
-
-The cron job works for macOS only.
 
 For cron job, you need to allow **BOTH** of Terminal.app and `/bin/bash` Full Disk permissions in the security settings. ![security](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bash-full-disk-access.png)
 
 ![bin/bash](https://raw.githubusercontent.com/shinokada/cleanit/main/images/bin-bash.png)
 
-
 When you select /bin/bash, you need to show hidden files by `SHIFT+CMD+.`.
-
-- coreutils
-
-Install `coreutils` on macOS:
-
-```sh
-brew install coreutils
-```
-
-Install it on Ubuntu:
-
-```sh
-apt install coreutils
-```
 
 ## Installation
 
-### macOS x86_64/Linux using Homebrew
+### Using Homebrew
 
 ```sh
 brew tap shinokada/cleanit && brew install cleanit
 ```
 
-### macOS M1 chip/arm64
-
-Install using Awesome package manager. See the next section.
-
-### Using [Awesome Package Manager](https://github.com/shinokada/awesome) for macOS/Linux
+### Using Awesome Package Manager
 
 After installing the [Awesome script package manager](https://github.com/shinokada/awesome):
 
@@ -60,10 +51,7 @@ After installing the [Awesome script package manager](https://github.com/shinoka
 awesome install shinokada/cleanit
 brew install terminal-notifier
 brew install bash
-brew install coreutils
 ```
-
-Linux user must specify your Downloads directory and Trash directory using `-f /path/to/Downloads` and `-t /path/to/Trash`.
 
 ## Uninstallation
 
@@ -84,19 +72,13 @@ awesome rm cleanit
 Move files older than 20 days in ~/Downloads to ~/.Trash
 
 ```sh
-# macOS
 cleanit
-# Linux
-cleanit -f /path/to/dir -t /path/to/trash
 ```
 
 Move files older than 10 days in ~/Mydir to ~/.Trash
 
 ```sh
-# macOS
 cleanit -D 10 -f ~/Mydir
-# Linux
-cleanit -D 10 -f '/path/to/dir' -t '/path/to/trash'
 ```
 
 Move files older than 5 days in ~/Mydir to ~/Anotherdir
@@ -108,16 +90,12 @@ cleanit -D 5 -f ~/Mydir -t ~/Anotherdir
 You can clean up the Trash directory.
 
 ```sh
-# macOS
 cleanit -D 30 -f trash
-# Linux
-cleanit -D 30 -f /path/to/trash
 ```
 
 This will remove files older than 30 days from `~.Trash` directory
 
 ```sh
-# only macOS
 cleanit cron -H 10 -M 0 -D 30
 ```
 

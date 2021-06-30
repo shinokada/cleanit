@@ -8,6 +8,8 @@
 script_name=$(basename "$0")
 version="0.3.3"
 script_dir=""
+downloads_dir=$HOME/Downloads
+trash_dir=$HOME/.Trash
 
 myrealpath() {
     local LINK REALPATH
@@ -26,17 +28,17 @@ myrealpath() {
 usage() {
     cat <<EOF
 Name: $script_name
-Description: This script moves files older than 20 days from a directory (default ~/Downloads) to another directory (default ~/.Trash).
+Description: This script moves files older than 20 days from a directory (default: ~/Downloads) to another directory (default: ~/.Trash).
 
 Usage:
-$script_name
+
 $script_name [-f <dir>][-t <dir>][-D <number>] 
 $script_name cron -H <hour> -M <minute> [-D <number>]
 $script_name -r
 
 Options: 
 
-    -f  target-directory [default: ~/Download as default]
+    -f  target-directory [default: ~/Download]
     -t  Set the directory where you want files to move to. [default: ~/.Trash]
     -r  Remove a cronjob
     -D  Set days to indicate the maximum days to keep files. [default: 20]
@@ -75,21 +77,11 @@ fn_check_cmd() {
     fi
 }
 
-# fn_check_realpath() {
-#     if [[ ! $(command -v realpath) ]]; then
-#         echo "It seems like you don't have coreutils." >&2
-#         echo "Please install coreutils by running brew install coreutils" >&2
-#         exit 1
-#     fi
-# }
-
 fn_find_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
-        # OS=$(dirname "$(readlink -f "$0")")
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         OS="macos"
-        # OS=$(dirname "$(greadlink -f "$0")")
     fi
     echo $OS
 }
@@ -113,6 +105,16 @@ remove_from_trash() {
     find "$trash" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
     # remove direcotries
     find "$trash"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    return 0
+}
+
+remove_from() {
+    from=$1
+
+    # remove files
+    find "$from" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
+    # remove direcotries
+    find "$from"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null
     return 0
 }
 
@@ -252,6 +254,14 @@ while (($# > 0)); do
     cron)
         CRON="true"
         shift 1
+        ;;
+    downloads)
+        clean_downloads
+        exit
+        ;;
+    trash)
+        clean_trash
+        exit
         ;;
     -r | --remove)
         fn_remove_cron
