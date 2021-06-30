@@ -127,9 +127,17 @@ remove_from_trash() {
     NUM=$(fn_num "$trash_dir" "$DAYS")
     # echo "Removing files/dirs ..."
     # remove files
-    find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
+    find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
+        echo "Something went wrong."
+        exit 1
+    }
     # remove direcotries
-    find "$trash_dir"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || exit
+    find "$trash_dir"/* -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
+        echo "Something went wrong."
+        exit 1
+    }
+    echo "Removed $NUM files older than $DAYS days from ~/.Trash."
+    exit
 }
 
 remove_from_downloads() {
@@ -330,7 +338,6 @@ if [[ $NUM -gt 0 ]]; then
             echo "Can't remove from the directory, exiting script!" >&2
             exit 1
         }
-        echo "Removed $NUM files older than $DAYS days from ~/.Trash."
         exit 0
     else
         # move files to Trash
