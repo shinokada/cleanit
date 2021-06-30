@@ -261,11 +261,11 @@ while (($# > 0)); do
         ;;
     downloads)
         remove_from "$downloads_dir"
-        shift
+        exit
         ;;
     trash)
         remove_from "$trash_dir"
-        shift
+        exit
         ;;
     -r | --remove)
         fn_remove_cron
