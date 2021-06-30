@@ -257,19 +257,19 @@ while (($# > 0)); do
         ;;
     cron)
         CRON="true"
-        shift 1
+        shift
         ;;
     downloads)
         remove_from "$downloads_dir"
-        exit
+        shift
         ;;
     trash)
         remove_from "$trash_dir"
-        exit
+        shift
         ;;
     -r | --remove)
         fn_remove_cron
-        shift 1
+        shift
         ;;
     -H | --hour)
         HOUR=${2}
