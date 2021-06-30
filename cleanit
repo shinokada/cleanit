@@ -6,8 +6,22 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.3.1"
+version="0.3.3"
 script_dir=""
+
+myrealpath() {
+    local LINK REALPATH
+    local OURPWD=$PWD
+    cd "$(dirname "$1")" || exit
+    LINK=$(readlink "$(basename "$1")")
+    while [ "$LINK" ]; do
+        cd "$(dirname "$LINK")" || exit
+        LINK=$(readlink "$(basename "$1")")
+    done
+    REALPATH="$PWD/$(basename "$1")"
+    cd "$OURPWD" || exit
+    echo "$REALPATH"
+}
 
 usage() {
     cat <<EOF
@@ -61,13 +75,13 @@ fn_check_cmd() {
     fi
 }
 
-fn_check_realpath() {
-    if [[ ! $(command -v realpath) ]]; then
-        echo "It seems like you don't have coreutils." >&2
-        echo "Please install coreutils by running brew install coreutils" >&2
-        exit 1
-    fi
-}
+# fn_check_realpath() {
+#     if [[ ! $(command -v realpath) ]]; then
+#         echo "It seems like you don't have coreutils." >&2
+#         echo "Please install coreutils by running brew install coreutils" >&2
+#         exit 1
+#     fi
+# }
 
 fn_find_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -110,9 +124,9 @@ fn_num() {
 
 # from awesome script
 if [[ -z $(which "$0") ]]; then
-    script_dir=$(realpath "$0")
+    script_dir=$(myrealpath "$0")
 else
-    script_dir=$(realpath "$(which "${script_name}")")
+    script_dir=$(myrealpath "$(which "${script_name}")")
     script_dir=${script_dir%/*}
 fi
 
@@ -211,7 +225,7 @@ CRON="false"
 fn_check_cmd link
 fn_check_cmd terminal-notifier
 fn_check_cmd bash
-fn_check_realpath
+# fn_check_realpath
 
 # No parameter
 if [[ $# = 0 ]]; then
