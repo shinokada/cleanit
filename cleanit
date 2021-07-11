@@ -168,7 +168,7 @@ fn_cron() {
     local cleanitpath
     cleanitpath=$(which "$script_name")
     # cleanit path for $PATH
-    # cleanitdir_path=":${cleanitpath%/*}"
+    cleanitdir_path=":${cleanitpath%/*}"
     # echo "$cleanitdir_path"
     # exit
     local notifierpath
@@ -184,8 +184,8 @@ fn_cron() {
         touch "${plist_path}/${plist_name}"
         echo "A plist created."
     fi
-
-    sed "s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
+    # using + for sed path replacement
+    sed "s+changecleanit_dir+${cleanitdir_path}+;s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
     # launchd
     # mkdir -p ~/.cleanit
     # check ~/.cleanit dir
