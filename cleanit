@@ -167,6 +167,10 @@ fn_cron() {
     local hour=${3}
     local cleanitpath
     cleanitpath=$(which "$script_name")
+    # cleanit path for $PATH
+    # cleanitdir_path=":${cleanitpath%/*}"
+    # echo "$cleanitdir_path"
+    # exit
     local notifierpath
     notifierpath=$(which terminal-notifier)
 
@@ -324,7 +328,7 @@ if [[ ${CRON} = "true" ]]; then
     if [[ (-n "$MINUTE") && (-n "$HOUR") ]]; then
         fn_cron "${DAYS}" "${MINUTE}" "${HOUR}"
     else
-        echo "You must provide -o hour and -m minute." >&2
+        echo "You must provide -H hour and -M minute." >&2
         exit 1
     fi
 fi

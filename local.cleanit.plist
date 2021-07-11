@@ -9,7 +9,7 @@
         <key>EnvironmentVariables</key>
         <dict>
             <key>PATH</key>
-            <string>/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin:/usr/local/homebrew/bin</string>
+            <string>/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin:/usr/local/homebrew/bin:/Users/changeusername/.local/share/bin</string>
         </dict>
         <key>StandardInPath</key>
         <string>/tmp/cleanit.stdin</string>
