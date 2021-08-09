@@ -2,11 +2,11 @@
 
 ########################
 # Author: Shinichi Okada
-# Date: 2021-05-30
+# Date: 2021-08-9
 ###########################
 
 script_name=$(basename "$0")
-version="0.3.13"
+version="0.3.14"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
@@ -125,26 +125,34 @@ fi
 
 remove_from_trash() {
     NUM=$(fn_num "$trash_dir" "$DAYS")
-    # echo "Removing files/dirs ..."
-    # remove files
-    find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
-        echo "Something went wrong 1."
-        exit 1
-    }
-    # remove direcotries
-    find "$trash_dir" -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
-        echo "Something went wrong 2."
-        exit 1
-    }
-    echo "Removed $NUM files older than $DAYS days from ~/.Trash."
+    if ((NUM > 0)); then
+        # echo "Removing files/dirs ..."
+        # remove files
+        find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
+            echo "Something went wrong 1."
+            exit 1
+        }
+        # remove direcotries
+        find "$trash_dir" -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
+            echo "Something went wrong 2."
+            exit 1
+        }
+        echo "Removed $NUM files older than $DAYS days from ~/.Trash."
+    else
+        echo "Nothing to remove."
+    fi
     exit
 }
 
 remove_from_downloads() {
     NUM=$(fn_num "$downloads_dir" "$DAYS")
-    # echo "Removing files/dirs ..."
-    move_to_trash
-    echo "Removed $NUM files older than $DAYS days from Downloads."
+    if ((NUM > 0)); then
+        # echo "Removing files/dirs ..."
+        move_to_trash
+        echo "Removed $NUM files older than $DAYS days from Downloads."
+    else
+        echo "Nothing to remove."
+    fi
 }
 # script_dir=$(fn_script_dir)
 
