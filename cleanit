@@ -1,29 +1,48 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 ########################
 # Author: Shinichi Okada
-# Date: 2021-08-9
+# Date: 2021-08-22
 ###########################
 
 script_name=$(basename "$0")
-version="0.3.14"
+version="0.3.15"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
 
-myrealpath() {
-    local LINK REALPATH
-    local OURPWD=$PWD
-    cd "$(dirname "$1")" || exit
-    LINK=$(readlink "$(basename "$1")")
-    while [ "$LINK" ]; do
-        cd "$(dirname "$LINK")" || exit
-        LINK=$(readlink "$(basename "$1")")
+readlinkf() {
+    [ "${1:-}" ] || return 1
+    max_symlinks=40
+    CDPATH='' # to avoid changing to an unexpected directory
+
+    target=$1
+    [ -e "${target%/}" ] || target=${1%"${1##*[!/]}"} # trim trailing slashes
+    [ -d "${target:-/}" ] && target="$target/"
+
+    cd -P . 2>/dev/null || return 1
+    while [ "$max_symlinks" -ge 0 ] && max_symlinks=$((max_symlinks - 1)); do
+        if [ ! "$target" = "${target%/*}" ]; then
+            case $target in
+            /*) cd -P "${target%/*}/" 2>/dev/null || break ;;
+            *) cd -P "./${target%/*}" 2>/dev/null || break ;;
+            esac
+            target=${target##*/}
+        fi
+
+        if [ ! -L "$target" ]; then
+            target="${PWD%/}${target:+/}${target}"
+            printf '%s\n' "${target:-/}"
+            return 0
+        fi
+        link=$(ls -dl -- "$target" 2>/dev/null) || break
+        target=${link#*" $target -> "}
     done
-    REALPATH="$PWD/$(basename "$1")"
-    cd "$OURPWD" || exit
-    echo "$REALPATH"
+    return 1
 }
+
+self=$(readlinkf "$0")
+script_dir=${self%/*}
 
 usage() {
     cat <<EOF
@@ -79,7 +98,7 @@ EOF
 }
 
 fn_check_cmd() {
-    if [[ ! $(command -v "$1") ]]; then
+    if [ ! "$(command -v "$1")" ]; then
         echo "It seems like you don't have $1." >&2
         echo "Please install $1 by running brew install $1" >&2
         exit 1
@@ -87,16 +106,24 @@ fn_check_cmd() {
 }
 
 fn_find_os() {
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    case $(uname -s) in
+    [Ll][Ii][Nn][Uu][Xx])
         OS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        ;;
+    [Dd][Aa][Rr][Ww][Ii][Nn])
         OS="macos"
-    fi
+        ;;
+    esac
+    # if [ "$OSTYPE" == "linux-gnu"* ]; then
+    #     OS="linux"
+    # elif [[ "$OSTYPE" == "darwin"* ]]; then
+    #     OS="macos"
+    # fi
     echo $OS
 }
 
 fn_check_trash_access() {
-    if [[ ! -r $HOME/.Trash ]]; then
+    if [ ! -r "$HOME"/.Trash ]; then
         echo "Give the Terminal.app Full Disk permission in the security settings. See the README." >&2
         exit 1
     fi
@@ -110,22 +137,14 @@ move_to_trash() {
 }
 
 fn_num() {
-    local from_dir=${1}
-    local days=${2}
+    from_dir=${1}
+    days=${2}
     find "${from_dir}" -mtime +"${days}" | wc -l | xargs
 }
 
-# from awesome script
-if [[ -z $(which "$0") ]]; then
-    script_dir=$(myrealpath "$0")
-else
-    script_dir=$(myrealpath "$(which "${script_name}")")
-    script_dir=${script_dir%/*}
-fi
-
 remove_from_trash() {
     NUM=$(fn_num "$trash_dir" "$DAYS")
-    if ((NUM > 0)); then
+    if [ "$NUM" -gt 0 ]; then
         # echo "Removing files/dirs ..."
         # remove files
         find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
@@ -146,7 +165,7 @@ remove_from_trash() {
 
 remove_from_downloads() {
     NUM=$(fn_num "$downloads_dir" "$DAYS")
-    if ((NUM > 0)); then
+    if [ "$NUM" -gt 0 ]; then
         # echo "Removing files/dirs ..."
         move_to_trash
         echo "Removed $NUM files older than $DAYS days from Downloads."
@@ -154,36 +173,27 @@ remove_from_downloads() {
         echo "Nothing to remove."
     fi
 }
-# script_dir=$(fn_script_dir)
 
 fn_cron() {
-    local plist_name
     plist_name="local.cleanit.plist"
-    local plist_path
     plist_path="$HOME/Library/LaunchAgents"
-    local launchd_name
     launchd_name="cleanit-launchd"
-    local launchd_path
     launchd_path="$HOME/.cleanit/"
-    local launchd_file
     launchd_file="${launchd_path}${launchd_name}"
     # local crondays=30
-    local username
     username=$(whoami)
-    local days=${1}
-    local minute=${2}
-    local hour=${3}
-    local cleanitpath
+    days=${1}
+    minute=${2}
+    hour=${3}
     cleanitpath=$(which "$script_name")
     # cleanit path for $PATH
     cleanitdir_path=":${cleanitpath%/*}"
     # echo "$cleanitdir_path"
     # exit
-    local notifierpath
     notifierpath=$(which terminal-notifier)
 
     # create a directory LaunchAgents and plist and save it to "${plist_path}/${plist_name}"
-    if [[ -d "${plist_path}" ]]; then
+    if [ -d "${plist_path}" ]; then
         echo "Creating ${plist_path}/${plist_name}"
         mkdir -p "${plist_path}" && touch "${plist_path}/${plist_name}"
     else
@@ -193,40 +203,38 @@ fn_cron() {
         echo "A plist created."
     fi
     # using + for sed path replacement
-    sed "s+changecleanit_dir+${cleanitdir_path}+;s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
+    sed "s+changecleanit_dir+${cleanitdir_path}+;s/changeusername/${username}/;s/changehour/${hour}/;s/changeminute/${minute}/" "${script_dir}/utils/${plist_name}" >"${plist_path}/${plist_name}" || exit 1
     # launchd
     # mkdir -p ~/.cleanit
     # check ~/.cleanit dir
-    if [[ ! -d "$HOME/.cleanit" ]]; then
+    if [ ! -d "$HOME/.cleanit" ]; then
         mkdir "$HOME/.cleanit"
     fi
     # touch /$HOME/.cleanit/cleanit-launchd
     touch "${launchd_file}"
     # replace $days in cleanit-launchd and write to the file
     # since path has /, use # in sed changenotifierpath
-    sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${script_dir}/${launchd_name}" >"${launchd_file}" || exit 1
+    sed "s/changedays/${days}/;s/changeusername/${username}/g;s#changecleanitpath#${cleanitpath}#;s#changenotifierpath#${notifierpath}#" "${script_dir}/utils/${launchd_name}" >"${launchd_file}" || exit 1
     # make the executable
     chmod +x "${launchd_file}"
     # if plist exist, unload it first
-    if [[ -e "${plist_path}/${plist_name}" ]]; then
+    if [ -e "${plist_path}/${plist_name}" ]; then
         # unload the job
-        launchctl unload -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
+        launchctl unload -w "${plist_path}/${plist_name}" >/dev/null 2>&1 || exit 1
     fi
     # load the job
-    launchctl load -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
+    launchctl load -w "${plist_path}/${plist_name}" >/dev/null 2>&1 || exit 1
     echo "Cron is set everyday at ${HOUR}:${MINUTE}."
     launchctl list | grep "$plist_name"
     exit
 }
 
 fn_remove_cron() {
-    local plist_name
     plist_name="local.cleanit.plist"
-    local plist_path
     plist_path="$HOME/Library/LaunchAgents"
     echo "Removing ${plist_path}/${plist_name} ..."
-    if [[ -e "${plist_path}/${plist_name}" ]]; then
-        launchctl unload -w "${plist_path}/${plist_name}" >&/dev/null || exit 1
+    if [ -e "${plist_path}/${plist_name}" ]; then
+        launchctl unload -w "${plist_path}/${plist_name}" >/dev/null 2>&1 || exit 1
     fi
     echo "Removed the file."
     exit
@@ -238,7 +246,7 @@ fn_remove_cron() {
 unset FROM_DIR TO_DIR DAYS
 
 # if OS is macOS
-if [[ $(fn_find_os) = "macos" ]]; then
+if [ "$(fn_find_os)" = "macos" ]; then
     FROM_DIR=$HOME/Downloads
     TO_DIR=$HOME/.Trash
 else
@@ -256,14 +264,14 @@ fn_check_cmd bash
 # fn_check_realpath
 
 # No parameter
-if [[ $# = 0 ]]; then
+if [ $# = 0 ]; then
     NUM=$(fn_num "$FROM_DIR" "$DAYS")
     move_to_trash
     echo "Moved ${NUM} files older than ${DAYS} days in the $(basename "${FROM_DIR}") to $(basename "${TO_DIR}")."
     exit 0
 fi
 
-while (($# > 0)); do
+while [ $# -gt 0 ]; do
     case $1 in
     -f | --from)
         FROM_DIR="${2}"
@@ -316,24 +324,39 @@ done
 [ -z "$FROM_DIR" ] || [ -z "$DAYS" ] || [ -z "$TO_DIR" ] && echo "Please provide -t and -f" && usage
 
 # Ubuntu has trash at /home/username/.local/share/Trash
-if [[ "$FROM_DIR" =~ "trash" ]]; then
+case $FROM_DIR in
+[Tt][Rr][Aa][Ss][Hh])
     NUM=$(fn_num "$HOME"/.Trash "$DAYS")
-    # NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
-elif [[ -d $FROM_DIR ]]; then
-    NUM=$(fn_num "$FROM_DIR" "$DAYS")
-    # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
-else
-    echo "No such directory: $FROM_DIR" >&2
-    exit 2
-fi
+    ;;
+*)
+    if [ -d "$FROM_DIR" ]; then
+        NUM=$(fn_num "$FROM_DIR" "$DAYS")
+        # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
+    else
+        echo "No such directory: $FROM_DIR" >&2
+        exit 2
+    fi
+    ;;
+esac
 
-if [[ $DAYS -lt 0 ]]; then
+# if [ "$FROM_DIR" =~ "trash" ]; then
+#     NUM=$(fn_num "$HOME"/.Trash "$DAYS")
+#     # NUM=$(find "$HOME"/.Trash -mtime +"$DAYS" | wc -l | xargs)
+# elif [ -d "$FROM_DIR" ]; then
+#     NUM=$(fn_num "$FROM_DIR" "$DAYS")
+#     # NUM=$(find "$FROM_DIR" -mtime +"$DAYS" | wc -l | xargs)
+# else
+#     echo "No such directory: $FROM_DIR" >&2
+#     exit 2
+# fi
+
+if [ "$DAYS" -lt 0 ]; then
     echo "Days must be greater then 0." >&2
     exit 1
 fi
 
-if [[ ${CRON} = "true" ]]; then
-    if [[ (-n "$MINUTE") && (-n "$HOUR") ]]; then
+if [ ${CRON} = "true" ]; then
+    if [ -n "$MINUTE" ] && [ -n "$HOUR" ]; then
         fn_cron "${DAYS}" "${MINUTE}" "${HOUR}"
     else
         echo "You must provide -H hour and -M minute." >&2
@@ -341,17 +364,19 @@ if [[ ${CRON} = "true" ]]; then
     fi
 fi
 
-if [[ $NUM -gt 0 ]]; then
+if [ "$NUM" -gt 0 ]; then
     # matches patterns in a case-insensitive
-    shopt -s nocasematch
-    if [[ "$FROM_DIR" =~ "trash" ]]; then
+    # shopt -s nocasematch
+    case $FROM_DIR in
+    [Tt][Rr][Aa][Ss][Hh])
         # remove files from Trash permanently
         remove_from_trash || {
             echo "Can't remove from the directory, exiting script!" >&2
             exit 1
         }
         exit 0
-    else
+        ;;
+    *)
         # move files to Trash
         move_to_trash || {
             echo "Can't move to trash, exiting script!" >&2
@@ -359,7 +384,25 @@ if [[ $NUM -gt 0 ]]; then
         }
         echo "Hi, Moved $NUM files older than $DAYS days in the $(basename "$FROM_DIR") to $(basename "$TO_DIR")."
         exit 0
-    fi
+        ;;
+    esac
+
+    # if [ "$FROM_DIR" = [Tt]rash ]; then
+    #     # remove files from Trash permanently
+    #     remove_from_trash || {
+    #         echo "Can't remove from the directory, exiting script!" >&2
+    #         exit 1
+    #     }
+    #     exit 0
+    # else
+    #     # move files to Trash
+    #     move_to_trash || {
+    #         echo "Can't move to trash, exiting script!" >&2
+    #         exit 1
+    #     }
+    #     echo "Hi, Moved $NUM files older than $DAYS days in the $(basename "$FROM_DIR") to $(basename "$TO_DIR")."
+    #     exit 0
+    # fi
 else
     echo "No files older than $DAYS days in $FROM_DIR."
     exit 0
