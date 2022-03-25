@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 ########################
 # Author: Shinichi Okada
@@ -6,7 +6,7 @@
 ###########################
 
 script_name=$(basename "$0")
-version="0.4.2"
+version="0.4.3"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
@@ -123,6 +123,9 @@ fn_find_os() {
 }
 
 fn_check_trash_access() {
+    # echo "Checking the full access..."
+    # test -r "$HOME"/.Trash
+    # echo $?
     if [ ! -r "$HOME"/.Trash ]; then
         echo "Give the Terminal.app Full Disk permission in the security settings. See the README." >&2
         exit 1
@@ -147,14 +150,14 @@ remove_from_trash() {
     if [ "$NUM" -gt 0 ]; then
         # echo "Removing files/dirs ..."
         # remove files
+
         find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
-            echo "Something went wrong 1."
-            exit 1
+            echo "No files to clean."
         }
         # remove direcotries
         find "$trash_dir" -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
-            echo "Something went wrong 2."
-            exit 1
+            echo "No directories to clean."
+            exit 0
         }
         echo "Removed $NUM files older than $DAYS days from ~/.Trash."
     else
