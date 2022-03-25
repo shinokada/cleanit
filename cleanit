@@ -3,10 +3,11 @@
 ########################
 # Author: Shinichi Okada
 # Date: 2021-08-22
+# Update: 2022-03-25
 ###########################
 
 script_name=$(basename "$0")
-version="0.4.3"
+version="0.4.4"
 script_dir=""
 downloads_dir=$HOME/Downloads
 trash_dir=$HOME/.Trash
@@ -153,6 +154,7 @@ remove_from_trash() {
 
         find "$trash_dir" -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
             echo "No files to clean."
+            exit 0
         }
         # remove direcotries
         find "$trash_dir" -type d -mtime +"$DAYS" -exec rm -rf {} \; 2>/dev/null || {
